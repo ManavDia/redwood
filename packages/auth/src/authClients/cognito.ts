@@ -11,61 +11,40 @@ import { AuthClient } from './index'
 export type { CognitoUserPool }
 export type { CognitoUser }
 interface CognitoCredentials {
-  username: string
+  email: string
   password: string
 }
-const getCognitoUser = (username: string): CognitoUser | null => {
-  const userPoolId = process.env.COGNITO_USERPOOL_ID || ''
-  const clientId = process.env.COGNITO_CLIENT_ID || ''
 
-  const userPool = new CognitoUserPool({
-    UserPoolId: userPoolId,
-    ClientId: clientId,
-  })
-
-  if (userPool) {
-    const userData = {
-      Username: username,
-      Pool: userPool,
-    }
-    const cognitoUser = new CognitoUser(userData)
-
-    return cognitoUser
-  }
-  return null
+export interface CognitoAuthClient extends AuthClient {
+  login: (options: {
+    email: string
+    password: string
+  }) => Promise<CognitoUserSession>
+  currentUser: () => Promise<CognitoUser | null>
 }
 
-export type CognitoAuthClient = AuthClient
-
 export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
-  const poolData = {
-    UserPoolId: process.env?.COGNITO_POOL_ID || '',
-    ClientId: process.env?.COGNITO_APP_CLIENT_ID || '',
-  }
-  if (!poolData.UserPoolId || !poolData.ClientId) {
-    throw new Error('Missing Cognito User Pool Id or ClientId')
-  }
-  const userPool: CognitoUserPool = new CognitoUserPool(poolData)
   return {
     client: client,
     type: 'cognito',
-    login: ({
-      username,
-      password,
-    }: CognitoCredentials): Promise<CognitoUserSession> => {
+    login: ({ email, password }) => {
       return new Promise((resolve, reject) => {
         const authenticationData = {
-          Username: username,
+          Username: email,
           Password: password,
         }
         const authenticationDetails = new AuthenticationDetails(
           authenticationData
         )
-        const cognitoUser = getCognitoUser(username)
+        const userData = {
+          Username: email,
+          Pool: client,
+        }
+        const cognitoUser = new CognitoUser(userData)
 
         cognitoUser?.authenticateUser(authenticationDetails, {
-          onSuccess: (result) => {
-            resolve(result)
+          onSuccess: (session) => {
+            resolve(session)
           },
           onFailure: (err: any) => {
             reject(err)
@@ -76,28 +55,22 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
     logout: (): void => {
       client.getCurrentUser()?.signOut()
     },
-    signup: ({ username, password }: CognitoCredentials) => {
+    signup: ({ email, password }: CognitoCredentials) => {
       return new Promise(function (resolve, reject) {
         const attributeList = [
           new CognitoUserAttribute({
             Name: 'email',
-            Value: username,
+            Value: email,
           }),
         ]
 
-        userPool.signUp(
-          username,
-          password,
-          attributeList,
-          [],
-          function (err, res) {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(res)
-            }
+        client.signUp(email, password, attributeList, [], function (err, res) {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(res)
           }
-        )
+        })
       }).catch((err) => {
         throw err
       })
@@ -109,7 +82,8 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
           if (err) {
             reject(err)
           } else {
-            resolve(session.getAccessToken().getJwtToken())
+            const jwtToken = session.getAccessToken().getJwtToken()
+            resolve(jwtToken)
           }
         })
       }).catch((err) => {
@@ -117,6 +91,15 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
       })
     },
     getUserMetadata: () => {
+      return new Promise<CognitoUser | null>((resolve) => {
+        const currentUser = client.getCurrentUser()
+        console.error({ currentUser })
+        resolve(currentUser)
+      }).catch((err) => {
+        throw err
+      })
+    },
+    currentUser: () => {
       return new Promise<CognitoUser | null>((resolve) => {
         const currentUser = client.getCurrentUser()
         resolve(currentUser)

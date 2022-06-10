@@ -1,3 +1,5 @@
+import { ICognitoUserData } from 'amazon-cognito-identity-js'
+
 import { auth0 } from './auth0'
 import type { Auth0, Auth0User } from './auth0'
 import { azureActiveDirectory } from './azureActiveDirectory'
@@ -7,7 +9,7 @@ import type {
 } from './azureActiveDirectory'
 import { clerk } from './clerk'
 import type { Clerk, ClerkUser } from './clerk'
-import { cognito, CognitoUser } from './cognito'
+import { cognito, CognitoAuthClient } from './cognito'
 import { custom } from './custom'
 import type { Custom } from './custom'
 import { dbAuth } from './dbAuth'
@@ -54,6 +56,7 @@ export type SupportedAuthClients =
   | GoTrue
   | NetlifyIdentity
   | MagicLink
+  | CognitoAuthClient
   | FirebaseClient
   | Supabase
   | Clerk
@@ -88,7 +91,7 @@ export type SupportedUserMetadata =
   | EthereumUser
   | NhostUser
   | SuperTokensUser
-  | CognitoUser
+  | ICognitoUserData
 export interface AuthClient {
   restoreAuthState?(): void | Promise<any>
   login(options?: any): Promise<any>

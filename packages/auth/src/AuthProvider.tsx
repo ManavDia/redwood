@@ -151,6 +151,7 @@ export class AuthProvider extends React.Component<
 
   getCurrentUser = async (): Promise<Record<string, unknown>> => {
     // Always get a fresh token, rather than use the one in state
+
     const token = await this.getToken()
     const response = await global.fetch(this.getApiGraphQLUrl(), {
       method: 'POST',
@@ -274,6 +275,7 @@ export class AuthProvider extends React.Component<
         hasError: true,
         error: e as Error,
       })
+      console.error({ e })
     }
   }
 
