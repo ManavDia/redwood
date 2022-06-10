@@ -33,6 +33,7 @@
     "@supabase/supabase-js": "1.35.1",
     "@types/netlify-identity-widget": "1.9.3",
     "@types/react": "17.0.44",
+    "amazon-cognito-identity-js": "5.2.9",
     "firebase": "9.6.11",
     "firebase-admin": "10.1.0",
     "gotrue-js": "0.9.29",
