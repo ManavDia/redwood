@@ -9,7 +9,7 @@ import type {
 } from './azureActiveDirectory'
 import { clerk } from './clerk'
 import type { Clerk, ClerkUser } from './clerk'
-import { cognito, CognitoAuthClient } from './cognito'
+import { Cognito, cognito, CognitoAuthClient } from './cognito'
 import { custom } from './custom'
 import type { Custom } from './custom'
 import { dbAuth } from './dbAuth'
@@ -63,6 +63,7 @@ export type SupportedAuthClients =
   | Ethereum
   | Nhost
   | SuperTokens
+  | Cognito
   | Custom
 
 export type SupportedAuthTypes = keyof typeof typesToClients

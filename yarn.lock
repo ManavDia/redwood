@@ -26208,6 +26208,80 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redwood-api-stafflink@workspace:packages/redwood-api-stafflink":
+  version: 0.0.0-use.local
+  resolution: "redwood-api-stafflink@workspace:packages/redwood-api-stafflink"
+  dependencies:
+    "@babel/cli": 7.16.7
+    "@babel/core": 7.16.7
+    "@babel/runtime-corejs3": 7.16.7
+    "@prisma/client": 3.12.0
+    "@redwoodjs/auth": 1.2.1
+    "@types/crypto-js": 4.1.1
+    "@types/jsonwebtoken": 8.5.8
+    "@types/md5": 2.3.2
+    "@types/split2": 3.2.1
+    aws-lambda: 1.0.7
+    cross-undici-fetch: 0.3.6
+    crypto-js: 4.1.1
+    humanize-string: 2.1.0
+    jest: 27.5.1
+    jsonwebtoken: 8.5.1
+    jwks-rsa: 2.0.5
+    md5: 2.3.0
+    pascalcase: 1.0.0
+    pino: 7.10.0
+    split2: 4.1.0
+    title-case: 3.0.3
+    typescript: 4.6.3
+    uuid: 8.3.2
+  peerDependencies:
+    "@clerk/clerk-sdk-node": 3.3.6
+    "@magic-sdk/admin": 1.4.1
+    firebase-admin: 10.1.0
+  peerDependenciesMeta:
+    "@clerk/clerk-sdk-node":
+      optional: true
+    "@magic-sdk/admin":
+      optional: true
+    firebase-admin:
+      optional: true
+  bin:
+    redwood: ./dist/bins/redwood.js
+    rw: ./dist/bins/redwood.js
+    rwfw: ./dist/bins/rwfw.js
+    tsc: ./dist/bins/tsc.js
+  languageName: unknown
+  linkType: soft
+
+"redwood-auth-stafflink@workspace:packages/redwood-auth-stafflink":
+  version: 0.0.0-use.local
+  resolution: "redwood-auth-stafflink@workspace:packages/redwood-auth-stafflink"
+  dependencies:
+    "@auth0/auth0-spa-js": 1.21.0
+    "@azure/msal-browser": 2.23.0
+    "@babel/cli": 7.16.7
+    "@babel/core": 7.16.7
+    "@clerk/clerk-js": 3.7.1
+    "@clerk/clerk-sdk-node": 3.3.6
+    "@clerk/types": 2.7.1
+    "@nhost/nhost-js": 1.1.2
+    "@supabase/supabase-js": 1.35.1
+    "@types/netlify-identity-widget": 1.9.3
+    "@types/react": 17.0.44
+    amazon-cognito-identity-js: 5.2.9
+    firebase: 9.6.11
+    firebase-admin: 10.1.0
+    gotrue-js: 0.9.29
+    jest: 27.5.1
+    magic-sdk: 8.1.1
+    netlify-identity-widget: 1.9.2
+    react: 17.0.2
+    supertokens-auth-react: 0.20.4
+    typescript: 4.6.3
+  languageName: unknown
+  linkType: soft
+
 "refractor@npm:^3.1.0":
   version: 3.5.0
   resolution: "refractor@npm:3.5.0"

@@ -14,7 +14,7 @@ interface CognitoCredentials {
   email: string
   password: string
 }
-
+export type Cognito = CognitoUserPool
 export interface CognitoAuthClient extends AuthClient {
   login: (options: {
     email: string
