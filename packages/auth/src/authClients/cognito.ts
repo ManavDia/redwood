@@ -14,13 +14,35 @@ interface CognitoCredentials {
   email: string
   password: string
 }
+interface NewPasswordRequired {
+  newPasswordCallback: (
+    newPassword: string,
+    user: CognitoUser
+  ) => Promise<CognitoUserSession>
+  status: {
+    code: number
+    message: string
+  }
+}
+interface ChangePasswordProps {
+  oldPassword: string
+  newPassword: string
+}
 export type Cognito = CognitoUserPool
 export interface CognitoAuthClient extends AuthClient {
   login: (options: {
     email: string
     password: string
-  }) => Promise<CognitoUserSession>
+  }) => Promise<CognitoUserSession | NewPasswordRequired>
   currentUser: () => Promise<CognitoUser | null>
+  /**
+   * Use this function when a user has a reset token and needs to change their password
+   */
+  confirmNewPassword: (
+    email: string,
+    newPassword: string,
+    token: string
+  ) => Promise<void>
 }
 
 export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
@@ -48,6 +70,31 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
           },
           onFailure: (err: any) => {
             reject(err)
+          },
+          newPasswordRequired: (_userAttributes, _requiredAttributes) => {
+            resolve({
+              // TODO: Fix security vulnerability with allowing a CognitoUser Parameter to this callback
+              newPasswordCallback: (newPassword, user = cognitoUser) => {
+                return new Promise((resolve, reject) => {
+                  user.completeNewPasswordChallenge(
+                    newPassword,
+                    {},
+                    {
+                      onSuccess: (session: CognitoUserSession) => {
+                        resolve(session)
+                      },
+                      onFailure: (err) => {
+                        reject(err)
+                      },
+                    }
+                  )
+                })
+              },
+              status: {
+                code: 409,
+                message: 'User needs to change their password',
+              },
+            })
           },
         })
       })
@@ -105,6 +152,59 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
         resolve(currentUser)
       }).catch((err) => {
         throw err
+      })
+    },
+    forgotPassword: (email: string) => {
+      return new Promise((resolve, reject) => {
+        const user = new CognitoUser({
+          Username: email,
+          Pool: client,
+        })
+        user.forgotPassword({
+          onSuccess: (result: any) => {
+            resolve(result)
+          },
+          onFailure: (err: Error) => {
+            console.error(
+              `Error getting validation token for user ${email}. ${err.message}`
+            )
+            reject(err)
+          },
+        })
+      })
+    },
+    confirmNewPassword: (email, newPassword, token) => {
+      return new Promise((resolve, reject) => {
+        const user = new CognitoUser({
+          Username: email,
+          Pool: client,
+        })
+        if (!user) {
+          return reject(`Could not find that user`)
+        } else {
+          user.confirmPassword(token, newPassword, {
+            onSuccess: (_success: string) => {
+              return resolve()
+            },
+            onFailure: (err: Error) => {
+              return reject(err)
+            },
+          })
+        }
+      })
+    },
+    resetPassword: ({ oldPassword, newPassword }: ChangePasswordProps) => {
+      return new Promise((resolve, reject) => {
+        const user = client.getCurrentUser()
+        if (user) {
+          user.changePassword(oldPassword, newPassword, (err, result) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(result)
+            }
+          })
+        }
       })
     },
   }
