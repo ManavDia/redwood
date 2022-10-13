@@ -5,7 +5,6 @@ import {
   CognitoUserAttribute,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js'
-
 import { AuthClient } from './index'
 
 export type { CognitoUserPool }
@@ -32,7 +31,8 @@ export type Cognito = CognitoUserPool
 export interface CognitoAuthClient extends AuthClient {
   login: (options: {
     email: string
-    password: string
+    password?: string
+    session?: CognitoUserSession
   }) => Promise<CognitoUserSession | NewPasswordRequired>
   currentUser: () => Promise<CognitoUser | null>
   /**
@@ -49,8 +49,11 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
   return {
     client: client,
     type: 'cognito',
-    login: ({ email, password }) => {
+    login: ({ email, password, session }) => {
       return new Promise((resolve, reject) => {
+        if (session) {
+          if (session.isValid()) return resolve(session)
+        }
         const authenticationData = {
           Username: email,
           Password: password,
@@ -140,7 +143,6 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
     getUserMetadata: () => {
       return new Promise<CognitoUser | null>((resolve) => {
         const currentUser = client.getCurrentUser()
-        console.error({ currentUser })
         resolve(currentUser)
       }).catch((err) => {
         throw err
