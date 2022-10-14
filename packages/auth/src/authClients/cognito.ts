@@ -52,7 +52,14 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
     login: ({ email, password, session }) => {
       return new Promise((resolve, reject) => {
         if (session) {
-          if (session.isValid()) return resolve(session)
+          if (session.isValid()) {
+            const user = new CognitoUser({
+              Username: email,
+              Pool: client,
+            })
+            user.setSignInUserSession(session)
+            return resolve(session)
+          }
         }
         const authenticationData = {
           Username: email,
