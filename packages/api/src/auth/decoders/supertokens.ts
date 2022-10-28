@@ -18,8 +18,9 @@ export const supertokens = async (token: string): Promise<any | null> => {
     function getKey(header: any, callback: jwt.SigningKeyCallback) {
       client.getSigningKey(
         header.kid,
-        function (err: Error | null, key: SigningKey) {
-          const signingKey = key.getPublicKey()
+        function (err: Error | null, key: SigningKey | undefined) {
+          const signingKey = key?.getPublicKey()
+          if (!signingKey) err = new Error('No signing key found')
           callback(err, signingKey)
         }
       )
