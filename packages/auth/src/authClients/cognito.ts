@@ -4,6 +4,7 @@ import {
   CognitoUserPool,
   CognitoUserAttribute,
   CognitoUserSession,
+  IAuthenticationDetailsData,
 } from 'amazon-cognito-identity-js'
 import { AuthClient } from './index'
 
@@ -61,7 +62,7 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
             return resolve(session)
           }
         }
-        const authenticationData = {
+        const authenticationData: IAuthenticationDetailsData = {
           Username: email,
           Password: password,
         }
@@ -73,7 +74,7 @@ export const cognito = (client: CognitoUserPool): CognitoAuthClient => {
           Pool: client,
         }
         const cognitoUser = new CognitoUser(userData)
-
+        cognitoUser?.setAuthenticationFlowType('USER_PASSWORD_AUTH')
         cognitoUser?.authenticateUser(authenticationDetails, {
           onSuccess: (session) => {
             resolve(session)
